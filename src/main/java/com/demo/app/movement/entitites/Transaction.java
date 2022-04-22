@@ -25,6 +25,10 @@ public class Transaction extends Audit{
     @Size(min = 16,max = 16)
     private String accountNumber;
 
+    @Field(name = "target_account")
+    @Size(min = 16,max = 16)
+    private String targetAccount;
+
     @Field(targetType = FieldType.DECIMAL128)
     private BigDecimal amount;
 
@@ -32,9 +36,16 @@ public class Transaction extends Audit{
     @Size(min = 8,max = 8)
     private String dni;
 
+    @NotEmpty
+    @Size(min = 8,max = 8)
+    private String targetDni;
+
     @Enumerated(EnumType.STRING)
     private TypeCurrency currency;
 
     @Range(min = 100,max = 999)
     private Integer cvc;
+
+    @Field(targetType = FieldType.DECIMAL128)
+    private BigDecimal commission;
 }
