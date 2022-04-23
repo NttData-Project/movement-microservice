@@ -14,7 +14,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 
-@JsonPropertyOrder({"id","dni","accountNumber","amount","currency","cvc","createAt","updateAt"})
+@JsonPropertyOrder({"id","dni","accountNumber","targetDni","targetAccount","amount","currency","cvc","commission","createAt","updateAt"})
 @Document(collection = "transaction")
 @Data
 public class Transaction extends Audit{

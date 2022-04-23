@@ -86,12 +86,7 @@ public class TransactionServiceImpl implements TransactionService {
             x.setBalance(x.getBalance().add(transaction.getAmount()));
             return updateCurrentAccount(x);
         });
-        return account.hasElement().flatMap(flag->{
-            if(flag){
-                return targetAccount.then(transactionRepository.save(transaction));
-            }
-            return Mono.empty();
-        });
+        return account.hasElement().flatMap(flag-> flag?targetAccount.then(transactionRepository.save(transaction)):Mono.empty());
     }
 
     @Override
@@ -109,12 +104,7 @@ public class TransactionServiceImpl implements TransactionService {
             x.setBalance(x.getBalance().add(transaction.getAmount()));
             return updateSavingAccount(x);
         });
-        return account.hasElement().flatMap(flag->{
-            if(flag) {
-                targetAccount.then(transactionRepository.save(transaction));
-            }
-            return Mono.empty();
-        });
+        return account.hasElement().flatMap(flag-> flag?targetAccount.then(transactionRepository.save(transaction)):Mono.empty());
     }
 
     @Override
@@ -126,7 +116,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setCommission(BigDecimal.valueOf(0));
         System.out.println(formattedDate);
         Mono<FixedTermAccount> account= findFixedTermAccountByDni(transaction.getDni(), transaction.getAccountNumber()).flatMap(x->{
-            if(x.getCvc().equals(transaction.getCvc()) && !x.getNumberTransactions().equals(0) && formattedDate.equals("23/04/2022")) {
+            if(x.getCvc().equals(transaction.getCvc()) && !x.getNumberTransactions().equals(0) && formattedDate.equals("24/04/2022")) {
                 x.setNumberTransactions(x.getNumberTransactions() - 1);
                 x.setBalance(x.getBalance().add(transaction.getAmount().negate()));
                 return updateFixedTermAccount(x);
@@ -138,12 +128,7 @@ public class TransactionServiceImpl implements TransactionService {
             x.setBalance(x.getBalance().add(transaction.getAmount().negate()));
             return updateFixedTermAccount(x);
         });
-        return account.hasElement().flatMap(flag->{
-            if(flag) {
-                targetAccount.then(transactionRepository.save(transaction));
-            }
-            return Mono.empty();
-        });
+        return account.hasElement().flatMap(flag->flag?targetAccount.then(transactionRepository.save(transaction)):Mono.empty());
     }
 
     @Override
