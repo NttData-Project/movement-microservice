@@ -1,6 +1,7 @@
 package com.demo.app.movement.controllers;
 
 import com.demo.app.movement.entitites.Movement;
+import com.demo.app.movement.entitites.TargetAccount;
 import com.demo.app.movement.services.MovementService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -28,17 +29,17 @@ public class MovementController {
         return movementService.findById(id);
     }
 
-    @PostMapping("/currentAccount")
-    public ResponseEntity<Mono<Movement>> saveTransactionByCurrentAccount(@RequestBody Movement movement){
-        return ResponseEntity.ok(movementService.saveTransactionOfCurrentAccount(movement));
+    @PostMapping("/currentAccount/{type}")
+    public ResponseEntity<Mono<Movement>> saveTransactionByCurrentAccount(@RequestBody Movement movement,@PathVariable TargetAccount type){
+        return ResponseEntity.ok(movementService.saveTransactionOfCurrentAccount(movement,type));
     }
-    @PostMapping("/savingAccount")
-    public ResponseEntity<Mono<Movement>> saveTransactionBySavingAccount(@RequestBody Movement movement){
-        return ResponseEntity.ok(movementService.saveTransactionOfSavingAccount(movement));
+    @PostMapping("/savingAccount/{type}")
+    public ResponseEntity<Mono<Movement>> saveTransactionBySavingAccount(@RequestBody Movement movement,@PathVariable TargetAccount type){
+        return ResponseEntity.ok(movementService.saveTransactionOfSavingAccount(movement,type));
     }
-    @PostMapping("/fixedTermAccount")
-    public ResponseEntity<Mono<Movement>> saveTransactionByFixedTermAccount(@RequestBody Movement movement){
-        return ResponseEntity.ok(movementService.saveTransactionOfFixedTermAccount(movement));
+    @PostMapping("/fixedTermAccount/{type}")
+    public ResponseEntity<Mono<Movement>> saveTransactionByFixedTermAccount(@RequestBody Movement movement,@PathVariable TargetAccount type){
+        return ResponseEntity.ok(movementService.saveTransactionOfFixedTermAccount(movement,type));
     }
     @PutMapping("/{id}")
     public Mono<ResponseEntity<Movement>> update(@RequestBody Movement movement, @PathVariable String id){
