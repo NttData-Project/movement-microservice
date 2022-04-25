@@ -34,8 +34,8 @@ public class Transaction extends Audit{
     private BigDecimal amount;
 
     @NotEmpty
-    @Size(min = 8,max = 8)
-    private String dni;
+    @Size(min = 8,max = 11)
+    private String identifier;
 
     @Enumerated(EnumType.STRING)
     private TypeCurrency currency;
