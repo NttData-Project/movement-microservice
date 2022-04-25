@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 @Service
 public class MovementServiceImpl implements MovementService {
@@ -185,4 +186,5 @@ public class MovementServiceImpl implements MovementService {
     public Mono<Void> delete(String id) {
         return movementRepository.deleteById(id);
     }
+
 }
