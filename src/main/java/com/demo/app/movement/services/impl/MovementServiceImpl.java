@@ -35,21 +35,21 @@ public class MovementServiceImpl implements MovementService {
                                @Value("${user}") String userUrl, WebClient.Builder webClientUser) {
         this.movementRepository = movementRepository;
         this.transactionRepository = transactionRepository;
-        this.webClientActiveCard = webClientActive.baseUrl(activeCardUrl).build();
+        this.webClientActiveCard = webClientActive.baseUrl("http://localhost:8032").build();
         this.webClientPassiveCard = webClientPassive.baseUrl("http://localhost:8022").build();
         this.webClientUser = webClientUser.baseUrl(userUrl).build();
     }
 
-    private Mono<CurrentAccount> findCurrentAccountByDni(String dni, String account){
-        return webClientPassiveCard.get().uri("/currentAccount/dni/" + dni + "/account/"+account).
+    private Mono<CurrentAccount> findCurrentAccountByIdentifier(String id){
+        return webClientPassiveCard.get().uri("/currentAccount/"+id).
                 retrieve().bodyToMono(CurrentAccount.class);
     }
-    private Mono<SavingAccount> findSavingAccountByDni(String dni, String account){
-        return webClientPassiveCard.get().uri("/savingAccount/dni/" + dni + "/account/"+account).
+    private Mono<SavingAccount> findSavingAccountByIdentifier(String id){
+        return webClientPassiveCard.get().uri("/savingAccount/"+id).
                 retrieve().bodyToMono(SavingAccount.class);
     }
-    private Mono<FixedTermAccount> findFixedTermAccountByDni(String dni, String account){
-        return webClientPassiveCard.get().uri("/fixedTermAccount/dni/" + dni + "/account/"+account).
+    private Mono<FixedTermAccount> findFixedTermAccountByIdentifier(String id){
+        return webClientPassiveCard.get().uri("/fixedTermAccount/"+id).
                 retrieve().bodyToMono(FixedTermAccount.class);
     }
 
@@ -76,13 +76,12 @@ public class MovementServiceImpl implements MovementService {
         transaction.setMovementId(movement.getId());
         if (type) {
             transaction.setAmount(movement.getAmount().negate());
-            transaction.setAccountNumber(movement.getAccountNumber());
-            transaction.setDni(movement.getDni());
+            transaction.setIdentifier(movement.getIdentifier());
         } else {
             transaction.setAmount(movement.getAmount());
-            transaction.setAccountNumber(movement.getTargetAccount());
-            transaction.setDni(movement.getTargetDni());
+            transaction.setIdentifier(movement.getTargetIdentifier());
         }
+        transaction.setType(type);
         transaction.setCurrency(movement.getCurrency());
         transaction.setDescription(movement.getDescription());
         return transaction;
@@ -97,18 +96,18 @@ public class MovementServiceImpl implements MovementService {
     }
     private Mono<?> targetAccount(Movement movement,TargetAccount type){
         if(type.equals(TargetAccount.CUENTA_CORRIENTE)) {
-            return findCurrentAccountByDni(movement.getTargetDni(), movement.getTargetAccount()).flatMap(x->{
+            return findCurrentAccountByIdentifier(movement.getTargetIdentifier()).flatMap(x->{
                 x.setBalance(x.getBalance().add(movement.getAmount()));
                 return updateCurrentAccount(x);
             });
         }
         if(type.equals(TargetAccount.AHORRO)){
-            return findSavingAccountByDni(movement.getTargetDni(), movement.getTargetAccount()).flatMap(x->{
+            return findSavingAccountByIdentifier(movement.getTargetIdentifier()).flatMap(x->{
                 x.setBalance(x.getBalance().add(movement.getAmount()));
                 return updateSavingAccount(x);
             });
         }
-        else return findFixedTermAccountByDni(movement.getTargetDni(), movement.getTargetAccount()).flatMap(x->{
+        else return findFixedTermAccountByIdentifier(movement.getTargetIdentifier()).flatMap(x->{
             if(x.getNumberTransactions().equals(0)) movement.setCommission(BigDecimal.valueOf(4));
             x.setBalance(x.getBalance().add(movement.getAmount().negate()));
             return updateFixedTermAccount(x);
@@ -122,19 +121,19 @@ public class MovementServiceImpl implements MovementService {
     @Override
     public Mono<Movement> saveTransactionOfCurrentAccount(Movement movement,TargetAccount type) {
         movement.setCommission(BigDecimal.valueOf(0));
-        Mono<CurrentAccount> account= findCurrentAccountByDni(movement.getDni(), movement.getAccountNumber()).flatMap(x->{
-            if(x.getCvc().equals(movement.getCvc())){
+        Mono<CurrentAccount> account= findCurrentAccountByIdentifier(movement.getIdentifier()).flatMap(x->{
+            if(x.getCvc().equals(movement.getCvc())) {
                 x.setBalance(x.getBalance().add(movement.getAmount().negate()));
                 return updateCurrentAccount(x);
             }
             return Mono.empty();
         });
-        return targetAccount(movement,type).hasElement().flatMap(flag->flag?account.then(createMovementAndTransaction(movement)):Mono.empty());
+        return account.hasElement().flatMap(flag->flag?targetAccount(movement,type).then(createMovementAndTransaction(movement)):Mono.empty());
     }
 
     @Override
     public Mono<Movement> saveTransactionOfSavingAccount(Movement movement,TargetAccount type) {
-        Mono<SavingAccount> account= findSavingAccountByDni(movement.getDni(), movement.getAccountNumber()).flatMap(x->{
+        Mono<SavingAccount> account= findSavingAccountByIdentifier(movement.getIdentifier()).flatMap(x->{
             if(x.getCvc().equals(movement.getCvc())) {
                 if (x.getNumberTransactions().equals(0)) movement.setCommission(BigDecimal.valueOf(4));
                 else x.setNumberTransactions(x.getNumberTransactions() - 1);
@@ -143,7 +142,7 @@ public class MovementServiceImpl implements MovementService {
             }
             return Mono.empty();
         });
-        return targetAccount(movement,type).hasElement().flatMap(flag->flag?account.then(createMovementAndTransaction(movement)):Mono.empty());
+        return account.hasElement().flatMap(flag->flag?targetAccount(movement,type).then(createMovementAndTransaction(movement)):Mono.empty());
     }
 
     @Override
@@ -154,7 +153,7 @@ public class MovementServiceImpl implements MovementService {
         String formattedDate = dtf.format(dateObj);
         movement.setCommission(BigDecimal.valueOf(0));
         System.out.println(formattedDate);
-        Mono<FixedTermAccount> account= findFixedTermAccountByDni(movement.getDni(), movement.getAccountNumber()).flatMap(x->{
+        Mono<FixedTermAccount> account= findFixedTermAccountByIdentifier(movement.getIdentifier()).flatMap(x->{
             if(x.getCvc().equals(movement.getCvc()) && !x.getNumberTransactions().equals(0) && formattedDate.equals("24/04/2022")) {
                 x.setNumberTransactions(x.getNumberTransactions() - 1);
                 x.setBalance(x.getBalance().add(movement.getAmount().negate()));
@@ -162,7 +161,7 @@ public class MovementServiceImpl implements MovementService {
             }
             return Mono.empty();
         });
-        return targetAccount(movement,type).hasElement().flatMap(flag->flag?account.then(createMovementAndTransaction(movement)):Mono.empty());
+        return account.hasElement().flatMap(flag->flag?targetAccount(movement,type).then(createMovementAndTransaction(movement)):Mono.empty());
     }
 
 
@@ -176,7 +175,6 @@ public class MovementServiceImpl implements MovementService {
         return movementRepository.findById(id).flatMap(x->{
             x.setAmount(movement.getAmount());
             x.setCurrency(movement.getCurrency());
-            x.setAccountNumber(movement.getAccountNumber());
             x.setCvc(movement.getCvc());
             return movementRepository.save(x);
         });

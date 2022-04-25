@@ -25,24 +25,14 @@ public class Movement extends Audit{
     @NotEmpty
     private String description;
 
-    @Field(name = "account_number")
-    @Size(min = 16,max = 16)
-    private String accountNumber;
-
-    @Field(name = "target_account")
-    @Size(min = 16,max = 16)
-    private String targetAccount;
-
     @Field(targetType = FieldType.DECIMAL128)
     private BigDecimal amount;
 
     @NotEmpty
-    @Size(min = 8,max = 8)
-    private String dni;
+    private String identifier;
 
     @NotEmpty
-    @Size(min = 8,max = 8)
-    private String targetDni;
+    private String targetIdentifier;
 
     @Enumerated(EnumType.STRING)
     private TypeCurrency currency;

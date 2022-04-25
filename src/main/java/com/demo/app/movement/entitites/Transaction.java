@@ -26,16 +26,11 @@ public class Transaction extends Audit{
 
     private Boolean type;
 
-    @Field(name = "account_number")
-    @Size(min = 16,max = 16)
-    private String accountNumber;
+    @NotEmpty
+    private String identifier;
 
     @Field(targetType = FieldType.DECIMAL128)
     private BigDecimal amount;
-
-    @NotEmpty
-    @Size(min = 8,max = 8)
-    private String dni;
 
     @Enumerated(EnumType.STRING)
     private TypeCurrency currency;
