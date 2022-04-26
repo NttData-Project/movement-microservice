@@ -23,4 +23,8 @@ public interface MovementService {
 
     Mono<Void> delete(String id);
 
+    public Flux<Transaction> findByIdentifier(String identifier);
+
+    public Mono<BigDecimal> productBalance(String accountNumber);
+
 }
