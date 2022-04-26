@@ -73,12 +73,11 @@ public class MovementServiceImpl implements MovementService {
     private Transaction createTransaction(Movement movement,Boolean type) {
         Transaction transaction = new Transaction();
         transaction.setMovementId(movement.getId());
+        transaction.setAmount(movement.getAmount());
         if (type) {
-            transaction.setAmount(movement.getAmount().negate());
             transaction.setCommission(movement.getCommission());
             transaction.setIdentifier(movement.getIdentifier());
         } else {
-            transaction.setAmount(movement.getAmount());
             transaction.setIdentifier(movement.getTargetIdentifier());
             transaction.setCommission(BigDecimal.valueOf(0));
         }
