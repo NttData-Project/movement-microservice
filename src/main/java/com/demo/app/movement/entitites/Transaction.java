@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 
 @Document(collection = "transaction")
 @Data
-public class Transaction extends Audit{
+public class Transaction extends Audit {
     @Id
     private String id;
 
@@ -34,4 +34,7 @@ public class Transaction extends Audit{
 
     @Enumerated(EnumType.STRING)
     private TypeCurrency currency;
+
+    @Field(targetType = FieldType.DECIMAL128)
+    private BigDecimal commission;
 }
