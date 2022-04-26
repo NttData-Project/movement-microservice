@@ -10,21 +10,12 @@ import java.math.BigDecimal;
 
 public interface MovementService {
     Flux<Movement> findAll();
-
-    Mono<Movement> saveTransactionOfCurrentAccount(Movement movement, TargetAccount type);
-
-    Mono<Movement> saveTransactionOfSavingAccount(Movement movement, TargetAccount type);
-
-    Mono<Movement> saveTransactionOfFixedTermAccount(Movement movement, TargetAccount type);
-
+    Mono<Movement> saveTransactionOfCurrentAccount(Movement movement,TargetAccount type);
+    Mono<Movement> saveTransactionOfSavingAccount(Movement movement,TargetAccount type);
+    Mono<Movement> saveTransactionOfFixedTermAccount(Movement movement,TargetAccount type);
     Mono<Movement> findById(String id);
-
     Mono<Movement> update(Movement movement, String id);
-
     Mono<Void> delete(String id);
-
-    public Flux<Transaction> findByIdentifier(String identifier);
-
-    public Mono<BigDecimal> productBalance(String accountNumber);
-
+    Flux<Transaction> findByIdentifier(String identifier);
+    Mono<BigDecimal> productBalance(String accountNumber);
 }

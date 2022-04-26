@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 
 @Repository
-public interface TransactionRepository extends ReactiveMongoRepository<Transaction, String> {
-    public Flux<Transaction> findByIdentifier(String identifier);
+public interface TransactionRepository extends ReactiveMongoRepository<Transaction,String> {
+    Flux<Transaction> findByIdentifier(String identifier);
 }

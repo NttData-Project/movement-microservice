@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 
 @Document(collection = "transaction")
 @Data
-public class Transaction extends Audit {
+public class Transaction extends Audit{
     @Id
     private String id;
 
