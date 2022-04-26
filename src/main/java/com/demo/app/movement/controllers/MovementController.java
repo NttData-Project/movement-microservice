@@ -2,6 +2,7 @@ package com.demo.app.movement.controllers;
 
 import com.demo.app.movement.entitites.Movement;
 import com.demo.app.movement.entitites.TargetAccount;
+import com.demo.app.movement.entitites.Transaction;
 import com.demo.app.movement.services.MovementService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -56,9 +57,14 @@ public class MovementController {
         return movementService.delete(id).map(ResponseEntity::ok).defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/identifier/{identifier}")
+    @GetMapping("/balance/{identifier}")
     public Mono<BigDecimal> getBalance(@PathVariable String identifier) {
         return movementService.productBalance(identifier);
+    }
+
+    @GetMapping("/movement/{identifier}")
+    public Flux<Transaction> getMovementsByIdentifier(@PathVariable String identifier) {
+        return movementService.findByIdentifier(identifier);
     }
 
 }
