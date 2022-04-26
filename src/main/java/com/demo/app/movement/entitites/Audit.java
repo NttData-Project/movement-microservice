@@ -1,6 +1,7 @@
 package com.demo.app.movement.entitites;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -17,9 +18,11 @@ import java.util.Date;
 public class Audit {
     @CreatedDate
     @Field(name = "create_at")
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private Date createAt;
 
     @LastModifiedDate
     @Field(name = "update_at")
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private Date updateAt;
 }
