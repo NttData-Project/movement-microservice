@@ -20,4 +20,6 @@ public interface TransactionRepository extends ReactiveMongoRepository<Transacti
 
     Flux<Transaction> findByIdentifierAndCreateAtBetween(String identifier,Date startDate, Date finishDate);
 
+    Flux<Transaction> findByIdentifierAndTypeAndCreateAtBetween(String identifier, Boolean type, Date startDate, Date finishDate);
+
 }

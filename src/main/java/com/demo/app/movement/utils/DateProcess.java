@@ -5,17 +5,17 @@ import java.util.Date;
 
 public class DateProcess {
 
-    public static Date addMonth(Date date) {
+    public static Date addMonth(Date date,int quanttyMonths) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        calendar.add(Calendar.MONTH, 1);
+        calendar.add(Calendar.MONTH,quanttyMonths);
         return calendar.getTime();
     }
 
-    public static Date reduceOneMonth(Date date) {
+    public static Date reduceOneMonth(Date date,int quanttyMonths) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        calendar.add(Calendar.MONTH, -1);
+        calendar.add(Calendar.MONTH, quanttyMonths);
         return calendar.getTime();
     }
 
