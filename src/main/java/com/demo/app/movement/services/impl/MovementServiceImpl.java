@@ -247,10 +247,14 @@ public class MovementServiceImpl implements MovementService {
                     return result == false ? transactionRepository.findByIdentifierAndTypeAndCreateAtBetween(identifier, false, DateProcess.updateDate(cc.getCutoffDate(), 0), DateProcess.updateDate(cc.getPaymentDate(), 1))
                             .map(tm ->
                                     tm.getType() == false ? tm.getAmount() : new BigDecimal(0))
-                            .reduce(BigDecimal.ZERO, BigDecimal::add) : transactionRepository.findByIdentifierAndTypeAndCreateAtBetween(identifier, false, DateProcess.reduceOneMonth(DateProcess.updateDate(cc.getCutoffDate(), 0), -1), DateProcess.reduceOneMonth(DateProcess.updateDate(cc.getPaymentDate(), 1),-1)).map(tm ->
+                            .reduce(BigDecimal.ZERO, BigDecimal::add) : transactionRepository.findByIdentifierAndTypeAndCreateAtBetween(identifier, false, DateProcess.reduceOneMonth(DateProcess.updateDate(cc.getCutoffDate(), 0), -1), DateProcess.reduceOneMonth(DateProcess.updateDate(cc.getPaymentDate(), 1), -1)).map(tm ->
                                     tm.getType() == false ? tm.getAmount() : new BigDecimal(0))
                             .reduce(BigDecimal.ZERO, BigDecimal::add);
                 });
-        return valor;
+
+        return valor.map(c -> {
+            paymentsOutOfCutPeriod.map(pay -> c.add(pay));
+            return c;
+        });
     }
 }
