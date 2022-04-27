@@ -223,7 +223,15 @@ public class MovementServiceImpl implements MovementService {
     public Mono<BigDecimal> productBalanceByPeriod(String identifier) {
         Mono<BigDecimal> valor = webClientActiveCard.get().uri("/idCreditAccount/" + identifier).retrieve().bodyToMono(CreditAccount.class)
                 .flatMap(cc -> {
-                   return transactionRepository.findByIdentifierAndCreateAtBetween(identifier, DateProcess.addDay(cc.getCutoffDate()), DateProcess.addMonth(cc.getCutoffDate())).map(tm ->
+                    Boolean result = false;
+                    Calendar today = Calendar.getInstance();
+                    Calendar cutDate = Calendar.getInstance();
+                    cutDate.setTime(cc.getCutoffDate());
+                    result = today.before(cutDate);
+
+                    return result == false ? transactionRepository.findByIdentifierAndCreateAtBetween(identifier, DateProcess.updateDate(cc.getCutoffDate(), 0), DateProcess.addMonth(cc.getCutoffDate())).map(tm ->
+                                    tm.getType() == false ? tm.getAmount() : tm.getAmount().negate())
+                            .reduce(BigDecimal.ZERO, BigDecimal::add) : transactionRepository.findByIdentifierAndCreateAtBetween(identifier, DateProcess.reduceOneMonth(cc.getCutoffDate()), DateProcess.updateDate(cc.getCutoffDate(), 0)).map(tm ->
                                     tm.getType() == false ? tm.getAmount() : tm.getAmount().negate())
                             .reduce(BigDecimal.ZERO, BigDecimal::add);
                 });
