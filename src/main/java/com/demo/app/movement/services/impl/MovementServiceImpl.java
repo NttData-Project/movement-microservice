@@ -3,12 +3,14 @@ package com.demo.app.movement.services.impl;
 import com.demo.app.movement.entitites.Movement;
 import com.demo.app.movement.entitites.TargetAccount;
 import com.demo.app.movement.entitites.Transaction;
+import com.demo.app.movement.models.CreditAccount;
 import com.demo.app.movement.models.CurrentAccount;
 import com.demo.app.movement.models.FixedTermAccount;
 import com.demo.app.movement.models.SavingAccount;
 import com.demo.app.movement.repositories.MovementRepository;
 import com.demo.app.movement.repositories.TransactionRepository;
 import com.demo.app.movement.services.MovementService;
+import com.demo.app.movement.utils.DateProcess;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -215,5 +217,16 @@ public class MovementServiceImpl implements MovementService {
                 .map(tp -> tp.getType() == true ? tp.getAmount() : new BigDecimal(0))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         return balance;
+    }
+
+    @Override
+    public Mono<BigDecimal> productBalanceByPeriod(String identifier) {
+        Mono<BigDecimal> valor = webClientActiveCard.get().uri("/idCreditAccount/" + identifier).retrieve().bodyToMono(CreditAccount.class)
+                .flatMap(cc -> {
+                   return transactionRepository.findByIdentifierAndCreateAtBetween(identifier, DateProcess.addDay(cc.getCutoffDate()), DateProcess.addMonth(cc.getCutoffDate())).map(tm ->
+                                    tm.getType() == false ? tm.getAmount() : tm.getAmount().negate())
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                });
+        return valor;
     }
 }

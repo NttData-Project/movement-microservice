@@ -17,4 +17,7 @@ public interface TransactionRepository extends ReactiveMongoRepository<Transacti
     Flux<Transaction> findByCommissionGreaterThan(BigDecimal commission);
 
     Flux<Transaction> findByIdentifierAndCreateAtBetweenAndCommissionGreaterThan(String identifier, Date startDate, Date finishDate, BigDecimal commission);
+
+    Flux<Transaction> findByIdentifierAndCreateAtBetween(String identifier,Date startDate, Date finishDate);
+
 }

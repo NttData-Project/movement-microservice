@@ -3,6 +3,7 @@ package com.demo.app.movement.controllers;
 import com.demo.app.movement.entitites.Movement;
 import com.demo.app.movement.entitites.TargetAccount;
 import com.demo.app.movement.entitites.Transaction;
+import com.demo.app.movement.models.CreditAccount;
 import com.demo.app.movement.services.MovementService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -78,5 +79,10 @@ public class MovementController {
     @GetMapping("/balancecomission/{identifier}/{startDate}/{finishDate}/{commission}")
     public Mono<BigDecimal> comisionBalanceByRange(String identifier, @PathVariable @DateTimeFormat(pattern = "dd-MM-yyyy") Date startDate, @PathVariable @DateTimeFormat(pattern = "dd-MM-yyyy") Date finishDate, BigDecimal commission) {
         return movementService.comisionBalanceByRange(identifier, startDate, finishDate, commission);
+    }
+
+    @GetMapping("/idCreditAccount/{identifier}")
+    public Mono<BigDecimal> productBalanceByPeriod(@PathVariable String identifier) {
+        return movementService.productBalanceByPeriod(identifier);
     }
 }

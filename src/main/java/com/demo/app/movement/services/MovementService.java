@@ -33,4 +33,7 @@ public interface MovementService {
 
 
     public Mono<BigDecimal> comisionBalanceByRange(String identifier, Date startDate, Date finishDate, BigDecimal commission);
+
+    Mono<BigDecimal> productBalanceByPeriod(String identifier);
+
 }
