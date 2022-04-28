@@ -63,6 +63,11 @@ public class MovementServiceImpl implements MovementService {
                 .bodyToMono(CurrentAccount.class);
     }
 
+    private Mono<CreditAccount> findCreditAccountByIdentifier(String identifier){
+        return webClientActiveCard.get().uri("/idCreditAccount/" + identifier)
+                .retrieve().bodyToMono(CreditAccount.class);
+    }
+
     private Mono<SavingAccount> updateSavingAccount(SavingAccount savingAccount) {
         return webClientPassiveCard.put().uri("/savingAccount/" + savingAccount.getId()).
                 body(Mono.just(savingAccount), SavingAccount.class)
@@ -221,39 +226,36 @@ public class MovementServiceImpl implements MovementService {
 
     @Override
     public Mono<BigDecimal> productBalanceByPeriod(String identifier) {
-        Mono<BigDecimal> valor = webClientActiveCard.get().uri("/idCreditAccount/" + identifier).retrieve().bodyToMono(CreditAccount.class)
+        Calendar today = Calendar.getInstance();
+        Calendar cutDate = Calendar.getInstance();
+        Mono<BigDecimal> valor = findCreditAccountByIdentifier(identifier)
                 .flatMap(cc -> {
                     Boolean result = false;
-                    Calendar today = Calendar.getInstance();
-                    Calendar cutDate = Calendar.getInstance();
                     cutDate.setTime(cc.getCutoffDate());
                     result = today.before(cutDate);
-
-                    return result == false ? transactionRepository.findByIdentifierAndCreateAtBetween(identifier, DateProcess.reduceOneMonth(DateProcess.updateDate(cc.getCutoffDate(), 0), -1), DateProcess.reduceOneMonth(DateProcess.updateDate(cc.getCutoffDate(), 1), 0))
+                    return !result ? transactionRepository.findByIdentifierAndCreateAtBetween(identifier, DateProcess.reduceOneMonth(DateProcess.updateDate(cc.getCutoffDate(), 0), -1), DateProcess.reduceOneMonth(DateProcess.updateDate(cc.getCutoffDate(), 1), 0))
                             .map(tm ->
-                                    tm.getType() == false ? tm.getAmount() : tm.getAmount().negate())
+                                    !tm.getType() ? tm.getAmount() : tm.getAmount().negate())
                             .reduce(BigDecimal.ZERO, BigDecimal::add) : transactionRepository.findByIdentifierAndCreateAtBetween(identifier, DateProcess.reduceOneMonth(DateProcess.updateDate(cc.getCutoffDate(), 0), -2), DateProcess.reduceOneMonth(DateProcess.updateDate(cc.getCutoffDate(), 1), -1)).map(tm ->
-                                    tm.getType() == false ? tm.getAmount() : tm.getAmount().negate())
+                                    !tm.getType() ? tm.getAmount() : tm.getAmount().negate())
                             .reduce(BigDecimal.ZERO, BigDecimal::add);
                 });
 
-        Mono<BigDecimal> paymentsOutOfCutPeriod = webClientActiveCard.get().uri("/idCreditAccount/" + identifier).retrieve().bodyToMono(CreditAccount.class)
+        Mono<BigDecimal> paymentsOutOfCutPeriod = findCreditAccountByIdentifier(identifier)
                 .flatMap(cc -> {
                     Boolean result = false;
-                    Calendar today = Calendar.getInstance();
-                    Calendar cutDate = Calendar.getInstance();
                     cutDate.setTime(cc.getCutoffDate());
                     result = today.before(cutDate);
-                    return result == false ? transactionRepository.findByIdentifierAndTypeAndCreateAtBetween(identifier, false, DateProcess.updateDate(cc.getCutoffDate(), 0), DateProcess.updateDate(cc.getPaymentDate(), 1))
+                    return !result ? transactionRepository.findByIdentifierAndTypeAndCreateAtBetween(identifier, false, DateProcess.updateDate(cc.getCutoffDate(), 0), DateProcess.updateDate(cc.getPaymentDate(), 1))
                             .map(tm ->
-                                    tm.getType() == false ? tm.getAmount() : new BigDecimal(0))
+                                    !tm.getType() ? tm.getAmount() : new BigDecimal(0))
                             .reduce(BigDecimal.ZERO, BigDecimal::add) : transactionRepository.findByIdentifierAndTypeAndCreateAtBetween(identifier, false, DateProcess.reduceOneMonth(DateProcess.updateDate(cc.getCutoffDate(), 0), -1), DateProcess.reduceOneMonth(DateProcess.updateDate(cc.getPaymentDate(), 1), -1)).map(tm ->
-                                    tm.getType() == false ? tm.getAmount() : new BigDecimal(0))
+                                    !tm.getType() ? tm.getAmount() : new BigDecimal(0))
                             .reduce(BigDecimal.ZERO, BigDecimal::add);
                 });
 
         return valor.map(c -> {
-            paymentsOutOfCutPeriod.map(pay -> c.add(pay));
+            paymentsOutOfCutPeriod.map(c::add);
             return c;
         });
     }
