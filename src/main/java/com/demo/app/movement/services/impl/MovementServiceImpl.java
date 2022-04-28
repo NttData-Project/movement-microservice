@@ -56,16 +56,28 @@ public class MovementServiceImpl implements MovementService {
                 retrieve().bodyToMono(FixedTermAccount.class);
     }
 
+    private Mono<CreditAccount> findCreditAccountByIdentifier(String identifier){
+        return webClientActiveCard.get().uri("/creditAccount/idCreditAccount/" + identifier)
+                .retrieve().bodyToMono(CreditAccount.class);
+    }
+
+    private Mono<CreditAccount> findCreditAccountById(String id){
+        return webClientActiveCard.get().uri("/creditAccount/" + id)
+                .retrieve().bodyToMono(CreditAccount.class);
+    }
+
+    private Mono<CreditAccount> updateCreditAccount(CreditAccount creditAccount){
+        return webClientActiveCard.put().uri("/creditAccount/" + creditAccount.getId())
+                .body(Mono.just(creditAccount),CreditAccount.class)
+                .retrieve()
+                .bodyToMono(CreditAccount.class);
+    }
+
     private Mono<CurrentAccount> updateCurrentAccount(CurrentAccount currentAccount) {
         return webClientPassiveCard.put().uri("/currentAccount/" + currentAccount.getId()).
                 body(Mono.just(currentAccount), CurrentAccount.class)
                 .retrieve()
                 .bodyToMono(CurrentAccount.class);
-    }
-
-    private Mono<CreditAccount> findCreditAccountByIdentifier(String identifier){
-        return webClientActiveCard.get().uri("/creditAccount/idCreditAccount/" + identifier)
-                .retrieve().bodyToMono(CreditAccount.class);
     }
 
     private Mono<SavingAccount> updateSavingAccount(SavingAccount savingAccount) {
@@ -175,6 +187,18 @@ public class MovementServiceImpl implements MovementService {
             return Mono.empty();
         });
         return account.hasElement().flatMap(flag -> flag ? targetAccount(movement, type).then(createMovementAndTransaction(movement)) : Mono.empty());
+    }
+
+    @Override
+    public Mono<Movement> saveTransactionOfCreditAccount(Movement movement) {
+        Mono<CreditAccount> account = findCreditAccountById(movement.getIdentifier()).flatMap(x->{
+            if(x.getCvc().equals(movement.getCvc())){
+                x.setBalance(x.getBalance().add(movement.getAmount().negate()));
+                return updateCreditAccount(x);
+            }
+            return Mono.empty();
+        });
+        return account.hasElement().flatMap(flag->flag?createMovementAndTransaction(movement):Mono.empty());
     }
 
 

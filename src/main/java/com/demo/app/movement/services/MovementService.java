@@ -7,7 +7,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
 import java.util.Date;
 
 public interface MovementService {
@@ -18,6 +17,8 @@ public interface MovementService {
     Mono<Movement> saveTransactionOfSavingAccount(Movement movement, TargetAccount type);
 
     Mono<Movement> saveTransactionOfFixedTermAccount(Movement movement, TargetAccount type);
+
+    Mono<Movement> saveTransactionOfCreditAccount(Movement movement);
 
     Mono<Movement> findById(String id);
 

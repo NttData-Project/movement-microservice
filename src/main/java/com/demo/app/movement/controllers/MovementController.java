@@ -50,6 +50,11 @@ public class MovementController {
         return ResponseEntity.ok(movementService.saveTransactionOfFixedTermAccount(movement, type));
     }
 
+    @PostMapping("/creditAccount")
+    public ResponseEntity<Mono<Movement>> saveTransactionByCreditAccount(@RequestBody Movement movement) {
+        return ResponseEntity.ok(movementService.saveTransactionOfCreditAccount(movement));
+    }
+
     @PutMapping("/{id}")
     public Mono<ResponseEntity<Movement>> update(@RequestBody Movement movement, @PathVariable String id) {
         return movementService.update(movement, id).map(ResponseEntity::ok).defaultIfEmpty(ResponseEntity.notFound().build());
