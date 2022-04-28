@@ -64,7 +64,7 @@ public class MovementServiceImpl implements MovementService {
     }
 
     private Mono<CreditAccount> findCreditAccountByIdentifier(String identifier){
-        return webClientActiveCard.get().uri("/idCreditAccount/" + identifier)
+        return webClientActiveCard.get().uri("/creditAccount/idCreditAccount/" + identifier)
                 .retrieve().bodyToMono(CreditAccount.class);
     }
 
