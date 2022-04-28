@@ -9,6 +9,7 @@ public class DateProcess {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.add(Calendar.MONTH,quanttyMonths);
+        System.out.println("addMonth = "+calendar.getTime().toString());
         return calendar.getTime();
     }
 
@@ -23,10 +24,9 @@ public class DateProcess {
         Calendar updateDate = Calendar.getInstance();
         Calendar lastDate = Calendar.getInstance();
         lastDate.setTime(date);
-
-        int oldDay = lastDate.DAY_OF_MONTH;
-        int month = updateDate.MONTH;
-        int year = updateDate.YEAR;
+        int oldDay = lastDate.get(Calendar.DAY_OF_MONTH);
+        int month = updateDate.get(Calendar.MONTH);;
+        int year = updateDate.get(Calendar.YEAR);
 
         updateDate.set(year, month, oldDay);
         if (param == 0) {

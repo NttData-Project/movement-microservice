@@ -56,8 +56,8 @@ public class MovementServiceImpl implements MovementService {
                 retrieve().bodyToMono(FixedTermAccount.class);
     }
 
-    private Mono<CreditAccount> findCreditAccountByIdentifier(String identifier){
-        return webClientActiveCard.get().uri("/creditAccount/idCreditAccount/" + identifier)
+    private Mono<CreditAccount> findProductById(String idProduct) {
+        return webClientActiveCard.get().uri("/creditAccount/" + idProduct)
                 .retrieve().bodyToMono(CreditAccount.class);
     }
 
@@ -252,7 +252,7 @@ public class MovementServiceImpl implements MovementService {
     public Mono<BigDecimal> productBalanceByPeriod(String identifier) {
         Calendar today = Calendar.getInstance();
         Calendar cutDate = Calendar.getInstance();
-        Mono<BigDecimal> valor = findCreditAccountByIdentifier(identifier)
+        Mono<BigDecimal> valor = findProductById(identifier)
                 .flatMap(cc -> {
                     Boolean result = false;
                     cutDate.setTime(cc.getCutoffDate());
@@ -265,7 +265,7 @@ public class MovementServiceImpl implements MovementService {
                             .reduce(BigDecimal.ZERO, BigDecimal::add);
                 });
 
-        Mono<BigDecimal> paymentsOutOfCutPeriod = findCreditAccountByIdentifier(identifier)
+        Mono<BigDecimal> paymentsOutOfCutPeriod = findProductById(identifier)
                 .flatMap(cc -> {
                     Boolean result = false;
                     cutDate.setTime(cc.getCutoffDate());

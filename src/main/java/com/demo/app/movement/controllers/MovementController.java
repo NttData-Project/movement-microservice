@@ -76,13 +76,16 @@ public class MovementController {
     }
 
     @GetMapping("/comission/{identifier}/{startDate}/{finishDate}/{commission}")
-    public Flux<Transaction> findByIdentifierAndCreateAtBetweenAndCommissionGreaterThan(@PathVariable String identifier, @PathVariable @DateTimeFormat(pattern = "dd-MM-yyyy") Date startDate,
+    public Flux<Transaction> findByIdentifierAndCreateAtBetweenAndCommissionGreaterThan(@PathVariable String identifier,
+                                                                                        @PathVariable @DateTimeFormat(pattern = "dd-MM-yyyy") Date startDate,
                                                                                         @PathVariable @DateTimeFormat(pattern = "dd-MM-yyyy") Date finishDate, @PathVariable BigDecimal commission) {
         return movementService.findByIdentifierAndCreateAtBetweenAndCommissionGreaterThan(identifier, startDate, finishDate, commission);
     }
 
     @GetMapping("/balancecomission/{identifier}/{startDate}/{finishDate}/{commission}")
-    public Mono<BigDecimal> comisionBalanceByRange(String identifier, @PathVariable @DateTimeFormat(pattern = "dd-MM-yyyy") Date startDate, @PathVariable @DateTimeFormat(pattern = "dd-MM-yyyy") Date finishDate, BigDecimal commission) {
+    public Mono<BigDecimal> comisionBalanceByRange(@PathVariable String identifier,
+                                                   @PathVariable @DateTimeFormat(pattern = "dd-MM-yyyy") Date startDate,
+                                                   @PathVariable @DateTimeFormat(pattern = "dd-MM-yyyy") Date finishDate, BigDecimal commission) {
         return movementService.comisionBalanceByRange(identifier, startDate, finishDate, commission);
     }
 
