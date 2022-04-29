@@ -15,10 +15,10 @@ import javax.persistence.Enumerated;
 import javax.validation.constraints.NotEmpty;
 import java.math.BigDecimal;
 
-@JsonPropertyOrder({"id","description","dni","accountNumber","targetDni","targetAccount","amount","currency","cvc","commission","createAt","updateAt"})
+@JsonPropertyOrder({"id", "description", "dni", "accountNumber", "targetDni", "targetAccount", "amount", "currency", "cvc", "commission", "createAt", "updateAt"})
 @Document(collection = "movement")
 @Data
-public class Movement extends Audit{
+public class Movement extends Audit {
     @Id
     private String id;
 
@@ -31,6 +31,8 @@ public class Movement extends Audit{
     @NotEmpty
     private String identifier;
 
+    private Boolean type;
+
     @NotEmpty
     private String targetIdentifier;
 
@@ -38,7 +40,7 @@ public class Movement extends Audit{
     private TypeCurrency currency;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Range(min = 100,max = 999)
+    @Range(min = 100, max = 999)
     private Integer cvc;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
