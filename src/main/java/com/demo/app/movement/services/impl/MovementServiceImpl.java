@@ -209,7 +209,7 @@ public class MovementServiceImpl implements MovementService {
 
     @Override
     public Mono<BigDecimal> productBalance(String identifier) {
-        Mono<BigDecimal> balance = transactionRepository.findByIdentifier(identifier).map(item -> item.getType() == false ? item.getAmount() : item.getAmount().negate()).reduce(BigDecimal.ZERO, BigDecimal::add);
+        Mono<BigDecimal> balance = transactionRepository.findByIdentifier(identifier).map(item -> !item.getType() ? item.getAmount() : item.getAmount().negate()).reduce(BigDecimal.ZERO, BigDecimal::add);
         return balance;
     }
 
@@ -220,7 +220,7 @@ public class MovementServiceImpl implements MovementService {
 
     @Override
     public Mono<BigDecimal> comisionBalanceByRange(String identifier, Date startDate, Date finishDate, BigDecimal commission) {
-        Mono<BigDecimal> balance = transactionRepository.findByIdentifier(identifier).map(tp -> tp.getType() == true ? tp.getAmount() : new BigDecimal(0)).reduce(BigDecimal.ZERO, BigDecimal::add);
+        Mono<BigDecimal> balance = transactionRepository.findByIdentifier(identifier).map(tp -> tp.getType() ? tp.getAmount() : new BigDecimal(0)).reduce(BigDecimal.ZERO, BigDecimal::add);
         return balance;
     }
 
@@ -229,14 +229,14 @@ public class MovementServiceImpl implements MovementService {
         Calendar today = Calendar.getInstance();
         Calendar cutDate = Calendar.getInstance();
         Mono<BigDecimal> valor = findProductById(identifier).flatMap(cc -> {
-            Boolean result = false;
+            Boolean result;
             cutDate.setTime(cc.getCutoffDate());
             result = today.before(cutDate);
             return !result ? transactionRepository.findByIdentifierAndCreateAtBetween(identifier, DateProcess.reduceOneMonth(DateProcess.updateDate(cc.getCutoffDate(), 0), -1), DateProcess.reduceOneMonth(DateProcess.updateDate(cc.getCutoffDate(), 1), 0)).map(tm -> !tm.getType() ? tm.getAmount() : tm.getAmount().negate()).reduce(BigDecimal.ZERO, BigDecimal::add) : transactionRepository.findByIdentifierAndCreateAtBetween(identifier, DateProcess.reduceOneMonth(DateProcess.updateDate(cc.getCutoffDate(), 0), -2), DateProcess.reduceOneMonth(DateProcess.updateDate(cc.getCutoffDate(), 1), -1)).map(tm -> !tm.getType() ? tm.getAmount() : tm.getAmount().negate()).reduce(BigDecimal.ZERO, BigDecimal::add);
         });
 
         Mono<BigDecimal> paymentsOutOfCutPeriod = findProductById(identifier).flatMap(cc -> {
-            Boolean result = false;
+            Boolean result;
             cutDate.setTime(cc.getCutoffDate());
             result = today.before(cutDate);
             return !result ? transactionRepository.findByIdentifierAndTypeAndCreateAtBetween(identifier, false, DateProcess.updateDate(cc.getCutoffDate(), 0), DateProcess.updateDate(cc.getPaymentDate(), 1)).map(tm -> !tm.getType() ? tm.getAmount() : new BigDecimal(0)).reduce(BigDecimal.ZERO, BigDecimal::add) : transactionRepository.findByIdentifierAndTypeAndCreateAtBetween(identifier, false, DateProcess.reduceOneMonth(DateProcess.updateDate(cc.getCutoffDate(), 0), -1), DateProcess.reduceOneMonth(DateProcess.updateDate(cc.getPaymentDate(), 1), -1)).map(tm -> !tm.getType() ? tm.getAmount() : new BigDecimal(0)).reduce(BigDecimal.ZERO, BigDecimal::add);
